@@ -5,11 +5,12 @@ import {
   Typography,
 } from "@material-ui/core";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "../components/image";
 import TopBar from "../components/topBar";
-import { setImages, setImagesPerPage, setPageNumber } from "../redux/actions";
+import useImages from "../hooks/useImages";
+import { setImagesPerPage, setPageNumber } from "../redux/actions";
 
 const Home = () => {
   const classes = useStyles();
@@ -19,26 +20,7 @@ const Home = () => {
   const page = useSelector((state) => state.images.pageNumber);
   const imagesPerPage = useSelector((state) => state.images.imagesPerPage);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingError, setLoadingError] = useState(null);
-
-  useEffect(() => {
-    fetch(
-      `https://picsum.photos/v2/list?page=${page + 1}&limit=${imagesPerPage}`
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        dispatch(setImages(res));
-        setLoadingError(null);
-      })
-      .catch(() => {
-        dispatch(setImages(null));
-        setLoadingError("There was an error loading data.");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [page, imagesPerPage, dispatch]);
+  const { isLoading, loadingError } = useImages({ imagesPerPage, page });
 
   const handleChangePage = (event, newPage) => {
     dispatch(setPageNumber(newPage));

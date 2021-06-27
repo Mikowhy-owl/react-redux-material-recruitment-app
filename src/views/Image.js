@@ -1,7 +1,7 @@
 import { CircularProgress, Grid } from "@material-ui/core";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import HomeButton from "../components/homeButton";
@@ -10,53 +10,17 @@ import ImageError from "../components/image/imageError";
 import MobileNavigationButtons from "../components/image/mobileNavigationButtons";
 import NavigationButton from "../components/navigationButton";
 import TopBar from "../components/topBar";
+import useImage from "../hooks/useImage";
 
 const Image = () => {
   const classes = useStyles();
   const params = useParams();
-
-  const [imageData, setImageData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingError, setLoadingError] = useState(null);
-
   const isMobile = useMediaQuery("(max-width:600px)");
-
-  const images = useSelector((state) => state.images.imagesArray);
-  const showImagesState = useSelector((state) => state.images.showImages);
-
   const imageId = params.id;
 
-  useEffect(() => {
-    const isActualImageInStore = images.find((x) => x.id === imageId);
+  const { imageData, isLoading, loadingError } = useImage({ imageId });
 
-    setIsLoading(true);
-
-    if (isActualImageInStore) {
-      setImageData(isActualImageInStore);
-      setLoadingError(null);
-      setIsLoading(false);
-    } else {
-      getImage();
-    }
-  }, [imageId, images]);
-
-  const getImage = () => {
-    fetch(`https://picsum.photos/id/${imageId}/info`)
-      .then((res) => res.json())
-      .then((res) => {
-        setLoadingError(null);
-        setImageData(res);
-      })
-      .catch(() => {
-        setLoadingError(
-          "There was problem fetching data or there is no image with that id. Try again."
-        );
-        setImageData(null);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+  const showImagesState = useSelector((state) => state.images.showImages);
 
   return (
     <Grid container className={classes.mainContainer}>
