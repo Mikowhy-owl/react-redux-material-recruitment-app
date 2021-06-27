@@ -1,23 +1,18 @@
-import {
-  Button,
-  CircularProgress,
-  Grid,
-  Link,
-  Typography,
-} from "@material-ui/core";
+import { CircularProgress, Grid } from "@material-ui/core";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
-import NavigateNextIcon from "@material-ui/icons/NavigateNext";
-import GoBackIcon from "@material-ui/icons/Reply";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import TopBar from "../components/TopBar";
+import { useParams } from "react-router-dom";
+import HomeButton from "../components/homeButton";
+import ImageDescription from "../components/image/imageDescription";
+import ImageError from "../components/image/imageError";
+import MobileNavigationButtons from "../components/image/mobileNavigationButtons";
+import NavigationButton from "../components/navigationButton";
+import TopBar from "../components/topBar";
 
 const Image = () => {
   const classes = useStyles();
-  const history = useHistory();
   const params = useParams();
 
   const [imageData, setImageData] = useState(null);
@@ -49,15 +44,16 @@ const Image = () => {
     fetch(`https://picsum.photos/id/${imageId}/info`)
       .then((res) => res.json())
       .then((res) => {
-        setImageData(res);
         setLoadingError(null);
-        setIsLoading(false);
+        setImageData(res);
       })
       .catch(() => {
         setLoadingError(
           "There was problem fetching data or there is no image with that id. Try again."
         );
         setImageData(null);
+      })
+      .finally(() => {
         setIsLoading(false);
       });
   };
@@ -73,13 +69,10 @@ const Image = () => {
                 {!isMobile ? (
                   <Grid container item xs={1} justify="center">
                     <Grid item>
-                      <Button
-                        onClick={() =>
-                          history.push(`/image/${parseInt(imageId) - 1}`)
-                        }
-                      >
-                        <NavigateBeforeIcon />
-                      </Button>
+                      <NavigationButton
+                        type="prev"
+                        url={`/image/${parseInt(imageId) - 1}`}
+                      />
                     </Grid>
                   </Grid>
                 ) : null}
@@ -96,122 +89,30 @@ const Image = () => {
                   />
 
                   {isMobile ? (
-                    <Grid
-                      container
-                      item
-                      className={classes.navigationIconsMobileContainer}
-                    >
-                      <Grid item xs={6}>
-                        <Button
-                          variant="contained"
-                          onClick={() =>
-                            history.push(`/image/${parseInt(imageId) - 1}`)
-                          }
-                        >
-                          Prev
-                        </Button>
-                      </Grid>
-                      <Grid container item xs={6} justify="flex-end">
-                        <Grid item>
-                          <Button
-                            variant="contained"
-                            onClick={() =>
-                              history.push(`/image/${parseInt(imageId) + 1}`)
-                            }
-                          >
-                            Next
-                          </Button>
-                        </Grid>
-                      </Grid>
-                    </Grid>
+                    <MobileNavigationButtons imageId={imageId} />
                   ) : null}
 
-                  <Grid container alignItems="center">
-                    <Grid item xs={10}>
-                      <Typography variant="h5">
-                        Author: {imageData.author}
-                      </Typography>
-                      <Typography variant="body1">
-                        Original width: {imageData.width} px
-                      </Typography>
-                      <Typography variant="body1">
-                        Original height: {imageData.height} px
-                      </Typography>
-                      <Typography variant="body2">
-                        Link:{" "}
-                        <Link target="blank" href={imageData.url}>
-                          {imageData.url}
-                        </Link>
-                      </Typography>
-                    </Grid>
-                  </Grid>
+                  <ImageDescription imageData={imageData} />
                 </Grid>
 
                 {!isMobile ? (
                   <Grid container item xs={1} justify="center">
                     <Grid item>
-                      <Button
-                        onClick={() =>
-                          history.push(`/image/${parseInt(imageId) + 1}`)
-                        }
-                      >
-                        <NavigateNextIcon />
-                      </Button>
+                      <NavigationButton
+                        type="next"
+                        url={`/image/${parseInt(imageId) + 1}`}
+                      />
                     </Grid>
                   </Grid>
                 ) : null}
 
-                <Grid
-                  container
-                  item
-                  xs={10}
-                  justify="flex-end"
-                  className={classes.goBackIconContainer}
-                >
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    onClick={() => history.replace("/")}
-                  >
-                    <GoBackIcon className={classes.goBackIcon} />
-                    Go back
-                  </Button>
-                </Grid>
+                <HomeButton />
               </Grid>
             </Grid>
           ) : (
             <Grid container direction="column" spacing={2}>
               {loadingError ? (
-                <>
-                  <Grid container item justify="center">
-                    <Typography variant="h6" color="error">
-                      {loadingError}
-                    </Typography>
-                  </Grid>
-                  <Grid container item justify="center" spacing={2}>
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        onClick={() => history.replace("/")}
-                      >
-                        Homepage
-                      </Button>
-                    </Grid>
-                    <Grid item>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={() =>
-                          history.push(
-                            `/image/${imageId < 0 ? 0 : parseInt(imageId) + 1}`
-                          )
-                        }
-                      >
-                        Next image
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </>
+                <ImageError loadingError={loadingError} imageId={imageId} />
               ) : (
                 <CircularProgress />
               )}
@@ -243,16 +144,6 @@ const useStyles = makeStyles((theme) =>
       },
       marginBottom: theme.spacing(2),
       boxShadow: "5px 5px 15px -8px #000000",
-    },
-    navigationIconsMobileContainer: {
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-    },
-    goBackIconContainer: {
-      marginTop: theme.spacing(3),
-    },
-    goBackIcon: {
-      marginRight: theme.spacing(1),
     },
   })
 );

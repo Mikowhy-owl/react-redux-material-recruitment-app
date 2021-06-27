@@ -1,8 +1,4 @@
 import {
-  Card,
-  CardActionArea,
-  CardContent,
-  CardMedia,
   CircularProgress,
   Grid,
   TablePagination,
@@ -11,13 +7,12 @@ import {
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import TopBar from "../components/TopBar";
+import Image from "../components/image";
+import TopBar from "../components/topBar";
 import { setImages, setImagesPerPage, setPageNumber } from "../redux/actions";
 
 const Home = () => {
   const classes = useStyles();
-  const history = useHistory();
   const dispatch = useDispatch();
   const data = useSelector((state) => state.images.imagesArray);
   const showImagesState = useSelector((state) => state.images.showImages);
@@ -35,11 +30,12 @@ const Home = () => {
       .then((res) => {
         dispatch(setImages(res));
         setLoadingError(null);
-        setIsLoading(false);
       })
       .catch(() => {
         dispatch(setImages(null));
         setLoadingError("There was an error loading data.");
+      })
+      .finally(() => {
         setIsLoading(false);
       });
   }, [page, imagesPerPage, dispatch]);
@@ -64,42 +60,11 @@ const Home = () => {
                 {data?.length && !isLoading ? (
                   <>
                     {data.map((image) => (
-                      <Grid key={image.id} item xs={12} md={6} lg={4}>
-                        <Card>
-                          <CardActionArea
-                            onClick={() => history.push(`/image/${image.id}`)}
-                          >
-                            <CardMedia
-                              key={page}
-                              className={classes.cardImage}
-                              component="img"
-                              src={
-                                !showImagesState
-                                  ? "https://globalhygiene.pl/wp-content/uploads/2018/07/blank-product-600x600.jpg"
-                                  : `https://picsum.photos/id/${image.id}/1000/300`
-                              }
-                              title="Contemplative Reptile"
-                            />
-                            <CardContent>
-                              <Typography
-                                gutterBottom
-                                variant="h5"
-                                component="h2"
-                              >
-                                {image.author}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                color="textSecondary"
-                                component="p"
-                              >
-                                Original width: {image.width} px <br />
-                                Original height: {image.height} px
-                              </Typography>
-                            </CardContent>
-                          </CardActionArea>
-                        </Card>
-                      </Grid>
+                      <Image
+                        image={image}
+                        page={page}
+                        showImagesState={showImagesState}
+                      />
                     ))}
                   </>
                 ) : (
@@ -141,9 +106,6 @@ const useStyles = makeStyles((theme) =>
     mainContainer: {
       marginTop: theme.spacing(4),
       marginBottom: theme.spacing(4),
-    },
-    cardImage: {
-      height: "260px",
     },
   })
 );

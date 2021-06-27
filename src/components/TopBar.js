@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { showImages } from "../redux/actions";
 
-function TopBar() {
+const TopBar = () => {
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useDispatch();
@@ -39,7 +39,7 @@ function TopBar() {
       </Grid>
     </Grid>
   );
-}
+};
 
 const useStyles = makeStyles((theme) =>
   createStyles({
